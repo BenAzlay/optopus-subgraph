@@ -1,67 +1,49 @@
-type AssetsReturned @entity(immutable: true) {
-  id: Bytes!
-  optionId: BigInt! # uint256
-  owner: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+type Option @entity {
+  id: ID!
+
+  owner: Bytes!            # Option owner
+  tokenId: BigInt!         # Uniswap V3 NFT tokenId
+  token0: Bytes!           # Address of token0
+  token1: Bytes!           # Address of token1
+  strikePrice: BigInt!     
+  expiry: BigInt!
+  isCall: Boolean!
+  totalSupply: BigInt!
+  exercisedAmount: BigInt!
+  premium: BigInt!
+
+  # Timestamps & metadata
+  createdAtTimestamp: BigInt!
+  createdAtBlock: BigInt!
 }
 
-type OptionExercised @entity(immutable: true) {
-  id: Bytes!
-  optionId: BigInt! # uint256
-  user: Bytes! # address
-  amount: BigInt! # uint256
-  profit: BigInt! # uint256
+type OptionPurchase @entity {
+  id: ID!
+  option: Option!          # Link back to the Option entity
+  buyer: Bytes!
+  amount: BigInt!
+  totalCost: BigInt!
+
+  timestamp: BigInt!
   blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
 }
 
-type OptionMinted @entity(immutable: true) {
-  id: Bytes!
-  optionId: BigInt! # uint256
-  owner: Bytes! # address
-  isCall: Boolean! # bool
-  strikePrice: BigInt! # uint256
-  expiry: BigInt! # uint256
+type OptionExercise @entity {
+  id: ID!
+  option: Option!
+  user: Bytes!
+  amount: BigInt!
+  profit: BigInt!
+
+  timestamp: BigInt!
   blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
 }
 
-type OptionPurchased @entity(immutable: true) {
-  id: Bytes!
-  optionId: BigInt! # uint256
-  buyer: Bytes! # address
-  amount: BigInt! # uint256
-  totalCost: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
+type AssetsReturn @entity {
+  id: ID!
+  option: Option!
+  owner: Bytes!
 
-type OwnershipTransferred @entity(immutable: true) {
-  id: Bytes!
-  previousOwner: Bytes! # address
-  newOwner: Bytes! # address
+  timestamp: BigInt!
   blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type Paused @entity(immutable: true) {
-  id: Bytes!
-  account: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type Unpaused @entity(immutable: true) {
-  id: Bytes!
-  account: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
 }

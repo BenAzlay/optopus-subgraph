@@ -35,10 +35,4 @@ dataSources:
           handler: handleOptionMinted
         - event: OptionPurchased(indexed uint256,indexed address,uint256,uint256)
           handler: handleOptionPurchased
-        - event: OwnershipTransferred(indexed address,indexed address)
-          handler: handleOwnershipTransferred
-        - event: Paused(address)
-          handler: handlePaused
-        - event: Unpaused(address)
-          handler: handleUnpaused
       file: ./src/optopus.ts

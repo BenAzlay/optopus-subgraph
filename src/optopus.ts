@@ -1,123 +1,106 @@
+// src/mapping.ts
+
 import {
-  AssetsReturned as AssetsReturnedEvent,
-  OptionExercised as OptionExercisedEvent,
   OptionMinted as OptionMintedEvent,
   OptionPurchased as OptionPurchasedEvent,
-  OwnershipTransferred as OwnershipTransferredEvent,
-  Paused as PausedEvent,
-  Unpaused as UnpausedEvent
+  OptionExercised as OptionExercisedEvent,
+  AssetsReturned as AssetsReturnedEvent,
 } from "../generated/Optopus/Optopus"
-import {
-  AssetsReturned,
-  OptionExercised,
-  OptionMinted,
-  OptionPurchased,
-  OwnershipTransferred,
-  Paused,
-  Unpaused
-} from "../generated/schema"
-
-export function handleAssetsReturned(event: AssetsReturnedEvent): void {
-  let entity = new AssetsReturned(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.optionId = event.params.optionId
-  entity.owner = event.params.owner
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleOptionExercised(event: OptionExercisedEvent): void {
-  let entity = new OptionExercised(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.optionId = event.params.optionId
-  entity.user = event.params.user
-  entity.amount = event.params.amount
-  entity.profit = event.params.profit
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
+import { Option, OptionPurchase, OptionExercise, AssetsReturn } from "../generated/schema"
+import { log } from "@graphprotocol/graph-ts"
 
 export function handleOptionMinted(event: OptionMintedEvent): void {
-  let entity = new OptionMinted(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.optionId = event.params.optionId
-  entity.owner = event.params.owner
-  entity.isCall = event.params.isCall
-  entity.strikePrice = event.params.strikePrice
-  entity.expiry = event.params.expiry
+  // Create or load Option entity
+  let id = event.params.optionId.toString()
+  let option = new Option(id)
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  // Populate fields
+  option.owner = event.params.owner
+  option.isCall = event.params.isCall
+  option.strikePrice = event.params.strikePrice
+  option.expiry = event.params.expiry
+  // If you need more data from the contract, you can read them using callHandlers 
+  // or from the event if they are included
 
-  entity.save()
+  // Add block/time metadata
+  option.createdAtTimestamp = event.block.timestamp
+  option.createdAtBlock = event.block.number
+
+  // Save
+  option.save()
 }
 
 export function handleOptionPurchased(event: OptionPurchasedEvent): void {
-  let entity = new OptionPurchased(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.optionId = event.params.optionId
-  entity.buyer = event.params.buyer
-  entity.amount = event.params.amount
-  entity.totalCost = event.params.totalCost
+  // ID for the purchase entity - can be txHash + logIndex for uniqueness
+  let entityId = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  let purchase = new OptionPurchase(entityId)
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  // Retrieve Option
+  let optionId = event.params.optionId.toString()
+  let option = Option.load(optionId)
+  if (!option) {
+    log.warning("Option with ID {} not found", [optionId])
+    return
+  }
+  purchase.option = option.id
 
-  entity.save()
+  // Purchase details
+  purchase.buyer = event.params.buyer
+  purchase.amount = event.params.amount
+  purchase.totalCost = event.params.totalCost
+
+  // Block & timestamp
+  purchase.timestamp = event.block.timestamp
+  purchase.blockNumber = event.block.number
+
+  // Save
+  purchase.save()
 }
 
-export function handleOwnershipTransferred(
-  event: OwnershipTransferredEvent
-): void {
-  let entity = new OwnershipTransferred(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.previousOwner = event.params.previousOwner
-  entity.newOwner = event.params.newOwner
+export function handleOptionExercised(event: OptionExercisedEvent): void {
+  let entityId = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  let exercise = new OptionExercise(entityId)
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  // Load the Option
+  let optionId = event.params.optionId.toString()
+  let option = Option.load(optionId)
+  if (!option) {
+    log.warning("Option with ID {} not found", [optionId])
+    return
+  }
+  exercise.option = option.id
 
-  entity.save()
+  // Exercise details
+  exercise.user = event.params.user
+  exercise.amount = event.params.amount
+  exercise.profit = event.params.profit
+
+  // Timestamps
+  exercise.timestamp = event.block.timestamp
+  exercise.blockNumber = event.block.number
+
+  // Save
+  exercise.save()
 }
 
-export function handlePaused(event: PausedEvent): void {
-  let entity = new Paused(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.account = event.params.account
+export function handleAssetsReturned(event: AssetsReturnedEvent): void {
+  let entityId = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  let assetsReturn = new AssetsReturn(entityId)
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  // Load the Option
+  let optionId = event.params.optionId.toString()
+  let option = Option.load(optionId)
+  if (!option) {
+    log.warning("Option with ID {} not found", [optionId])
+    return
+  }
+  assetsReturn.option = option.id
 
-  entity.save()
-}
+  // Assets return details
+  assetsReturn.owner = event.params.owner
 
-export function handleUnpaused(event: UnpausedEvent): void {
-  let entity = new Unpaused(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.account = event.params.account
+  assetsReturn.timestamp = event.block.timestamp
+  assetsReturn.blockNumber = event.block.number
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
+  assetsReturn.save()
 }
