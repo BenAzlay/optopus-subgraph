@@ -1,0 +1,44 @@
+specVersion: 1.2.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Optopus
+    network: base
+    source:
+      address: "0xd8429aae2ffef08ce6d6e45a9bfa0ca5fbfe5bc6"
+      abi: Optopus
+      startBlock: 26802380
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - AssetsReturned
+        - OptionExercised
+        - OptionMinted
+        - OptionPurchased
+        - OwnershipTransferred
+        - Paused
+        - Unpaused
+      abis:
+        - name: Optopus
+          file: ./abis/Optopus.json
+      eventHandlers:
+        - event: AssetsReturned(indexed uint256,indexed address)
+          handler: handleAssetsReturned
+        - event: OptionExercised(indexed uint256,indexed address,uint256,uint256)
+          handler: handleOptionExercised
+        - event: OptionMinted(indexed uint256,indexed address,bool,uint256,uint256)
+          handler: handleOptionMinted
+        - event: OptionPurchased(indexed uint256,indexed address,uint256,uint256)
+          handler: handleOptionPurchased
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: Paused(address)
+          handler: handlePaused
+        - event: Unpaused(address)
+          handler: handleUnpaused
+      file: ./src/optopus.ts

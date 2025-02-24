@@ -1,0 +1,67 @@
+type AssetsReturned @entity(immutable: true) {
+  id: Bytes!
+  optionId: BigInt! # uint256
+  owner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OptionExercised @entity(immutable: true) {
+  id: Bytes!
+  optionId: BigInt! # uint256
+  user: Bytes! # address
+  amount: BigInt! # uint256
+  profit: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OptionMinted @entity(immutable: true) {
+  id: Bytes!
+  optionId: BigInt! # uint256
+  owner: Bytes! # address
+  isCall: Boolean! # bool
+  strikePrice: BigInt! # uint256
+  expiry: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OptionPurchased @entity(immutable: true) {
+  id: Bytes!
+  optionId: BigInt! # uint256
+  buyer: Bytes! # address
+  amount: BigInt! # uint256
+  totalCost: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnershipTransferred @entity(immutable: true) {
+  id: Bytes!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Paused @entity(immutable: true) {
+  id: Bytes!
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Unpaused @entity(immutable: true) {
+  id: Bytes!
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
