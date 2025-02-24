@@ -8,7 +8,7 @@ dataSources:
     name: Optopus
     network: base
     source:
-      address: "0xd8429aae2ffef08ce6d6e45a9bfa0ca5fbfe5bc6"
+      address: "0x025662f089E993f3B51c07C43fc50ea92239A6dA"
       abi: Optopus
       startBlock: 26802380
     mapping:
